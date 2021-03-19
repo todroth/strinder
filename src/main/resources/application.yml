@@ -1,0 +1,7 @@
+spring:
+  jpa.open-in-view: true
+  webflux.base-path: /api
+
+server.servlet.context-path: /api
+
+api.the-movie-db.api-key: ${API_THEMOVIEDB_KEY}
