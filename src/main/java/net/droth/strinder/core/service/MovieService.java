@@ -1,20 +1,24 @@
 package net.droth.strinder.core.service;
 
-import net.droth.strinder.core.model.Movie;
+import net.droth.strinder.core.model.Genres;
+import net.droth.strinder.core.model.Movies;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @Service
-public class MovieService {
+public final class MovieService {
 
-    private final MovieApi movieApi;
+    private final TheMovieDbApi theMovieDbApi;
 
-    public MovieService(final MovieApi movieApi) {
-        this.movieApi = movieApi;
+    public MovieService(final TheMovieDbApi theMovieDbApi) {
+        this.theMovieDbApi = theMovieDbApi;
     }
 
-    public Flux<Movie> getMovies() {
-        return movieApi.fetchMovies();
+    public Mono<Genres> getGenres() {
+        return theMovieDbApi.getGenres();
     }
 
+    public Mono<Movies> getMovies(final int genre) {
+        return theMovieDbApi.getMovies(genre);
+    }
 }

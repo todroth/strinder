@@ -13,7 +13,8 @@ public class ApiConfiguration {
 
     @Data
     public static final class TheMovieDb {
-        private String apiKey;
+        private String baseUrl;
+        private String apiToken;
     }
 
 }
