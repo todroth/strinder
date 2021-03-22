@@ -1,9 +1,3 @@
-spring:
-  jpa.open-in-view: true
-  webflux.base-path: /api
-
-server.servlet.context-path: /api
-
 api.the-movie-db:
   base-url: https://api.themoviedb.org/3/
   api-token: ${API_THEMOVIEDB_APITOKEN}

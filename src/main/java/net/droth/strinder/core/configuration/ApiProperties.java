@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration;
 @Data
 @Configuration
 @ConfigurationProperties(prefix = "api")
-public class ApiConfiguration {
+public class ApiProperties {
 
     private TheMovieDb theMovieDb;
 

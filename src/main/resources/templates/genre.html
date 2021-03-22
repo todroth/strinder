@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Select</title>
+</head>
+<body>
+    <p th:text="'Selected genre: ' + ${genre.id} + ' - ' + ${genre.name}"/>
+
+    <div th:switch="${userType}">
+        <p th:case="${T(net.droth.strinder.view.model.UserType).HOST}" th:text="'Share URL: http://localhost:8080/u/'+ ${userPair.getGuest().getId()}"/>
+        <p th:case="${T(net.droth.strinder.view.model.UserType).GUEST}" th:text="'Share URL: http://localhost:8080/u/'+ ${userPair.getHost().getId()}"/>
+    </div>
+</body>
+</html>
