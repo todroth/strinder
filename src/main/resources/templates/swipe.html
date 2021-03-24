@@ -24,7 +24,14 @@
     <li th:text="'vote_average: ' + ${movie.vote_average}"/>
 </ul>
 
-<img th:src="${posterPath}" th:alt="${movie.title}" />
+<div>
+    <a th:href="'/u/' + ${userId} + '/g/' + ${genreId} + '/jop/' + ${movie.id}">jop</a>
+</div>
+<div>
+    <a th:href="'/u/' + ${userId} + '/g/' + ${genreId} + '/nop/' + ${movie.id}">nop</a>
+</div>
+
+<img th:src="${posterPath}" th:alt="${movie.title}"/>
 
 <div th:switch="${userType}">
     <p th:case="${T(net.droth.strinder.view.model.UserType).HOST}"

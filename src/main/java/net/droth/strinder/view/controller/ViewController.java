@@ -6,6 +6,7 @@ import net.droth.strinder.core.model.Genres;
 import net.droth.strinder.core.model.Movies;
 import net.droth.strinder.core.model.UserPair;
 import net.droth.strinder.core.service.MovieService;
+import net.droth.strinder.core.service.SwipeService;
 import net.droth.strinder.core.service.UserService;
 import net.droth.strinder.view.model.UserType;
 import org.springframework.stereotype.Controller;
@@ -24,10 +25,12 @@ public final class ViewController {
 
     private final MovieService movieService;
     private final UserService userService;
+    private final SwipeService swipeService;
 
-    public ViewController(final MovieService movieService, final UserService userService) {
+    public ViewController(final MovieService movieService, final UserService userService, final SwipeService swipeService) {
         this.movieService = movieService;
         this.userService = userService;
+        this.swipeService = swipeService;
     }
 
     @GetMapping("/")
@@ -59,10 +62,46 @@ public final class ViewController {
     }
 
     @GetMapping("/u/{userId}/g/{genreId}")
-    public String genre(@PathVariable final UUID userId, @PathVariable final int genreId, final Model model) {
+    public String swipe(@PathVariable final UUID userId, @PathVariable final int genreId, final Model model) {
 
-        if (!checkAndSetUser(userId, model)) {
+        if (!fillSwipePageData(userId, genreId, model)) {
             return "error";
+        }
+
+        return "swipe";
+    }
+
+    @GetMapping("/u/{userId}/g/{genreId}/jop/{movieId}")
+    public String jop(@PathVariable final UUID userId, @PathVariable final int genreId, @PathVariable final int movieId, final Model model) {
+
+        if (!fillSwipePageData(userId, genreId, model)) {
+            return "error";
+        }
+
+        swipeService.swipeYes(userId, movieId);
+
+        String url = "/u/" + userId + "/g/" + genreId;
+        return "redirect:" + url;
+
+    }
+
+    @GetMapping("/u/{userId}/g/{genreId}/nop/{movieId}")
+    public String nop(@PathVariable final UUID userId, @PathVariable final int genreId, @PathVariable final int movieId, final Model model) {
+
+        if (!fillSwipePageData(userId, genreId, model)) {
+            return "error";
+        }
+
+        swipeService.swipeNo(userId, movieId);
+
+        String url = "/u/" + userId + "/g/" + genreId;
+        return "redirect:" + url;
+
+    }
+
+    private boolean fillSwipePageData(final UUID userId, final int genreId, final Model model) {
+        if (!checkAndSetUser(userId, model)) {
+            return false;
         }
 
         Optional<Genres.Genre> selectedGenre = movieService.getGenres()
@@ -71,7 +110,7 @@ public final class ViewController {
 
         if (selectedGenre.isEmpty()) {
             log.warn("Genre '{}' does not exist", genreId);
-            return "error";
+            return false;
         }
 
         model.addAttribute("genre", selectedGenre.get());
@@ -79,21 +118,20 @@ public final class ViewController {
         Optional<Movies.Movie> randomMovie = movieService.getRandomMovie(genreId).blockOptional();
         if (randomMovie.isEmpty()) {
             log.error("No movie found for genre '{}'", genreId);
-            return "error";
+            return false;
         }
         model.addAttribute("movie", randomMovie.get());
 
         Optional<Configuration> configuration = movieService.getConfiguration().blockOptional();
         if (configuration.isEmpty()) {
             log.error("Configuration could not be loaded");
-            return "error";
+            return false;
         }
 
         Configuration.Images imgConf = configuration.get().getImages();
         String posterPath = imgConf.getBase_url() + imgConf.getPoster_sizes()[Math.min(2, imgConf.getPoster_sizes().length - 1)] + randomMovie.get().getPoster_path();
         model.addAttribute("posterPath", posterPath);
-
-        return "swipe";
+        return true;
     }
 
     private boolean checkAndSetUser(final UUID userId, final Model model) {

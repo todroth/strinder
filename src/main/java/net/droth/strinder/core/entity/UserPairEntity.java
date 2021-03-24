@@ -3,6 +3,7 @@ package net.droth.strinder.core.entity;
 import lombok.Data;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
 import java.io.Serializable;
@@ -20,6 +21,7 @@ public final class UserPairEntity implements Serializable {
     }
 
     @Id
+    @GeneratedValue
     private int id;
 
     @OneToOne

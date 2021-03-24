@@ -7,13 +7,14 @@ import net.droth.strinder.core.repository.UserPairRepository;
 import net.droth.strinder.core.repository.UserRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
 @Service
-public final class UserService {
+public class UserService {
 
     private final UserRepository userRepository;
     private final UserPairRepository userPairRepository;
@@ -25,6 +26,7 @@ public final class UserService {
         this.modelMapper = modelMapper;
     }
 
+    @Transactional
     public UserPair generateUserPair() {
         UserEntity host = userRepository.save(new UserEntity());
         UserEntity guest = userRepository.save(new UserEntity());
@@ -32,6 +34,7 @@ public final class UserService {
         return modelMapper.map(userPair, UserPair.class);
     }
 
+    @Transactional(readOnly = true)
     public Optional<UserPair> findUserPair(final UUID userId) {
         return userRepository.findById(userId)
                 .flatMap(userEntity -> Stream.of(
@@ -43,6 +46,7 @@ public final class UserService {
                 .map(userPairEntity -> modelMapper.map(userPairEntity, UserPair.class));
     }
 
+    @Transactional(readOnly = true)
     public boolean exists(final UUID userId) {
         return userRepository.existsById(userId);
     }

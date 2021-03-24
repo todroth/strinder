@@ -1,3 +1,5 @@
 api.the-movie-db:
   base-url: https://api.themoviedb.org/3/
   api-token: ${API_THEMOVIEDB_APITOKEN}
+
+logging.level.net.droth.strinder: DEBUG
