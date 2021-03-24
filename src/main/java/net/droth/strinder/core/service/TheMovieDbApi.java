@@ -1,5 +1,6 @@
 package net.droth.strinder.core.service;
 
+import net.droth.strinder.core.model.Configuration;
 import net.droth.strinder.core.model.Genres;
 import net.droth.strinder.core.model.Movies;
 import org.springframework.stereotype.Service;
@@ -31,6 +32,14 @@ public final class TheMovieDbApi {
                         .build())
                 .retrieve()
                 .bodyToMono(Movies.class)
+                .cache();
+    }
+
+    public Mono<Configuration> getConfiguration() {
+        return webClient.get()
+                .uri(uriBuilder -> uriBuilder.path("/configuration").build())
+                .retrieve()
+                .bodyToMono(Configuration.class)
                 .cache();
     }
 }
