@@ -1,6 +1,7 @@
 package net.droth.strinder.view.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import net.droth.strinder.core.exception.*;
 import net.droth.strinder.core.model.Configuration;
 import net.droth.strinder.core.model.Genres;
 import net.droth.strinder.core.model.Movies;
@@ -48,11 +49,10 @@ public final class ViewController {
     }
 
     @GetMapping("/u/{userId}")
-    public String swipe(@PathVariable final UUID userId, final Model model) {
+    public String swipe(@PathVariable final UUID userId, final Model model)
+            throws UserNotFoundException, UserPairNotFoundException {
 
-        if (!checkAndSetUser(userId, model)) {
-            return "error";
-        }
+        checkAndSetUser(userId, model);
 
         Optional<Genres> optionalGenres = movieService.getGenres().blockOptional();
         List<Genres.Genre> genres = optionalGenres.map(Genres::getGenres).orElse(Collections.emptyList());
@@ -62,21 +62,17 @@ public final class ViewController {
     }
 
     @GetMapping("/u/{userId}/g/{genreId}")
-    public String swipe(@PathVariable final UUID userId, @PathVariable final int genreId, final Model model) {
-
-        if (!fillSwipePageData(userId, genreId, model)) {
-            return "error";
-        }
-
+    public String swipe(@PathVariable final UUID userId, @PathVariable final int genreId, final Model model)
+            throws UserNotFoundException, UserPairNotFoundException, NoMovieFoundException, ConfigurationNotLoadedException, GenreNotFoundException {
+        fillSwipePageData(userId, genreId, model);
         return "swipe";
     }
 
     @GetMapping("/u/{userId}/g/{genreId}/jop/{movieId}")
-    public String jop(@PathVariable final UUID userId, @PathVariable final int genreId, @PathVariable final int movieId, final Model model) {
+    public String swipeYes(@PathVariable final UUID userId, @PathVariable final int genreId, @PathVariable final int movieId, final Model model)
+            throws UserNotFoundException, GenreNotFoundException, UserPairNotFoundException, NoMovieFoundException, ConfigurationNotLoadedException {
 
-        if (!fillSwipePageData(userId, genreId, model)) {
-            return "error";
-        }
+        fillSwipePageData(userId, genreId, model);
 
         swipeService.swipeYes(userId, movieId);
 
@@ -86,11 +82,10 @@ public final class ViewController {
     }
 
     @GetMapping("/u/{userId}/g/{genreId}/nop/{movieId}")
-    public String nop(@PathVariable final UUID userId, @PathVariable final int genreId, @PathVariable final int movieId, final Model model) {
+    public String swipeNo(@PathVariable final UUID userId, @PathVariable final int genreId, @PathVariable final int movieId, final Model model)
+            throws UserNotFoundException, GenreNotFoundException, UserPairNotFoundException, NoMovieFoundException, ConfigurationNotLoadedException {
 
-        if (!fillSwipePageData(userId, genreId, model)) {
-            return "error";
-        }
+        fillSwipePageData(userId, genreId, model);
 
         swipeService.swipeNo(userId, movieId);
 
@@ -99,56 +94,39 @@ public final class ViewController {
 
     }
 
-    private boolean fillSwipePageData(final UUID userId, final int genreId, final Model model) {
-        if (!checkAndSetUser(userId, model)) {
-            return false;
-        }
+    private void fillSwipePageData(final UUID userId, final int genreId, final Model model)
+            throws UserNotFoundException, GenreNotFoundException, NoMovieFoundException, ConfigurationNotLoadedException, UserPairNotFoundException {
+        checkAndSetUser(userId, model);
 
-        Optional<Genres.Genre> selectedGenre = movieService.getGenres()
+        Genres.Genre selectedGenre = movieService.getGenres()
                 .blockOptional()
-                .flatMap(genres -> genres.getGenres().stream().filter(genre -> genre.getId() == genreId).findFirst());
+                .flatMap(genres -> genres.getGenres().stream().filter(genre -> genre.getId() == genreId).findFirst())
+                .orElseThrow(() -> new GenreNotFoundException(genreId));
 
-        if (selectedGenre.isEmpty()) {
-            log.warn("Genre '{}' does not exist", genreId);
-            return false;
-        }
+        model.addAttribute("genre", selectedGenre);
 
-        model.addAttribute("genre", selectedGenre.get());
+        Movies.Movie randomMovie = movieService.getRandomMovie(genreId).blockOptional()
+                .orElseThrow(() -> new NoMovieFoundException(genreId));
 
-        Optional<Movies.Movie> randomMovie = movieService.getRandomMovie(genreId).blockOptional();
-        if (randomMovie.isEmpty()) {
-            log.error("No movie found for genre '{}'", genreId);
-            return false;
-        }
-        model.addAttribute("movie", randomMovie.get());
+        model.addAttribute("movie", randomMovie);
 
-        Optional<Configuration> configuration = movieService.getConfiguration().blockOptional();
-        if (configuration.isEmpty()) {
-            log.error("Configuration could not be loaded");
-            return false;
-        }
+        Configuration configuration = movieService.getConfiguration().blockOptional().orElseThrow(ConfigurationNotLoadedException::new);
 
-        Configuration.Images imgConf = configuration.get().getImages();
-        String posterPath = imgConf.getBase_url() + imgConf.getPoster_sizes()[Math.min(2, imgConf.getPoster_sizes().length - 1)] + randomMovie.get().getPoster_path();
+        Configuration.Images imgConf = configuration.getImages();
+        String posterPath = imgConf.getBase_url() + imgConf.getPoster_sizes()[Math.min(2, imgConf.getPoster_sizes().length - 1)] + randomMovie.getPoster_path();
         model.addAttribute("posterPath", posterPath);
-        return true;
     }
 
-    private boolean checkAndSetUser(final UUID userId, final Model model) {
+    private void checkAndSetUser(final UUID userId, final Model model)
+            throws UserNotFoundException, UserPairNotFoundException {
         if (!userService.exists(userId)) {
-            log.warn("User '{}' does not exist", userId);
-            return false;
+            throw new UserNotFoundException(userId);
         }
 
-        Optional<UserPair> userPair = userService.findUserPair(userId);
-        if (userPair.isEmpty()) {
-            log.warn("UserPair for '{}' does not exist", userId);
-            return false;
-        }
+        UserPair userPair = userService.findUserPair(userId).orElseThrow(() -> new UserPairNotFoundException(userId));
 
-        model.addAttribute("userPair", userPair.get());
-        model.addAttribute("userType", userType(userId, userPair.get()));
-        return true;
+        model.addAttribute("userPair", userPair);
+        model.addAttribute("userType", userType(userId, userPair));
     }
 
     private UserType userType(final UUID userId, final UserPair userPair) {
