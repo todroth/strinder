@@ -11,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Stream;
 
 @Service
 public class UserService {
@@ -37,12 +36,7 @@ public class UserService {
     @Transactional(readOnly = true)
     public Optional<UserPair> findUserPair(final UUID userId) {
         return userRepository.findById(userId)
-                .flatMap(userEntity -> Stream.of(
-                        userPairRepository.findUserPairEntityByHost(userEntity),
-                        userPairRepository.findUserPairEntityByGuest(userEntity)
-                ).filter(Optional::isPresent)
-                        .map(Optional::get)
-                        .findFirst())
+                .flatMap(userPairRepository::findUserPairEntityByUser)
                 .map(userPairEntity -> modelMapper.map(userPairEntity, UserPair.class));
     }
 

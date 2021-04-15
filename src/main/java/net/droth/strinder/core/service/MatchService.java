@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Stream;
 
 @Service
 public class MatchService {
@@ -33,11 +32,7 @@ public class MatchService {
         UserEntity user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
         Optional<SwipeEntity> swipeEntityOne = swipeRepository.findByUserIdAndMovieId(userId, movieId);
 
-        UserPairEntity userPair = Stream.of(userPairRepository.findUserPairEntityByHost(user), userPairRepository.findUserPairEntityByGuest(user))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .findFirst()
-                .orElseThrow(() -> new UserPairNotFoundException(userId));
+        UserPairEntity userPair = userPairRepository.findUserPairEntityByUser(user).orElseThrow(() -> new UserPairNotFoundException(userId));
 
         UUID userTwoId;
         if (userPair.getHost().getId().equals(userId)) {
