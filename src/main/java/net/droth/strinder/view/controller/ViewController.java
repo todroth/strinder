@@ -2,10 +2,12 @@ package net.droth.strinder.view.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import net.droth.strinder.core.exception.*;
-import net.droth.strinder.core.model.Configuration;
-import net.droth.strinder.core.model.Genres;
-import net.droth.strinder.core.model.Movies;
+import net.droth.strinder.core.model.Match;
+import net.droth.strinder.core.model.json.Configuration;
+import net.droth.strinder.core.model.json.Genres;
+import net.droth.strinder.core.model.json.Movies;
 import net.droth.strinder.core.model.UserPair;
+import net.droth.strinder.core.service.MatchService;
 import net.droth.strinder.core.service.MovieService;
 import net.droth.strinder.core.service.SwipeService;
 import net.droth.strinder.core.service.UserService;
@@ -27,11 +29,18 @@ public final class ViewController {
     private final MovieService movieService;
     private final UserService userService;
     private final SwipeService swipeService;
+    private final MatchService matchService;
 
-    public ViewController(final MovieService movieService, final UserService userService, final SwipeService swipeService) {
+    public ViewController(
+            final MovieService movieService,
+            final UserService userService,
+            final SwipeService swipeService,
+            final MatchService matchService
+    ) {
         this.movieService = movieService;
         this.userService = userService;
         this.swipeService = swipeService;
+        this.matchService = matchService;
     }
 
     @GetMapping("/")
@@ -91,6 +100,15 @@ public final class ViewController {
 
         String url = "/u/" + userId + "/g/" + genreId;
         return "redirect:" + url;
+
+    }
+
+    @GetMapping("/u/{userId}/matches")
+    public String matches(@PathVariable final UUID userId, final Model model) throws UserNotFoundException, UserPairNotFoundException {
+
+        List<Match> matches = matchService.getMatches(userId);
+        model.addAttribute("matches", matches);
+        return "matches";
 
     }
 

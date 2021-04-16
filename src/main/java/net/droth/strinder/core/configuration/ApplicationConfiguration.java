@@ -8,6 +8,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.util.Random;
+
 @Configuration
 public class ApplicationConfiguration {
 
@@ -31,6 +33,11 @@ public class ApplicationConfiguration {
         ModelMapper modelMapper = new ModelMapper();
         modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
         return modelMapper;
+    }
+
+    @Bean
+    public Random random() {
+        return new Random();
     }
 
 }

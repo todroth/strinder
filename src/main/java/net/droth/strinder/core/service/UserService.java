@@ -2,10 +2,11 @@ package net.droth.strinder.core.service;
 
 import net.droth.strinder.core.entity.UserEntity;
 import net.droth.strinder.core.entity.UserPairEntity;
+import net.droth.strinder.core.mapper.UserPairEntityMapper;
+import net.droth.strinder.core.model.UserPair;
 import net.droth.strinder.core.model.UserPair;
 import net.droth.strinder.core.repository.UserPairRepository;
 import net.droth.strinder.core.repository.UserRepository;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,12 +18,12 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final UserPairRepository userPairRepository;
-    private final ModelMapper modelMapper;
+    private final UserPairEntityMapper userPairEntityMapper;
 
-    public UserService(final UserRepository userRepository, final UserPairRepository userPairRepository, final ModelMapper modelMapper) {
+    public UserService(final UserRepository userRepository, final UserPairRepository userPairRepository, final UserPairEntityMapper userPairEntityMapper) {
         this.userRepository = userRepository;
         this.userPairRepository = userPairRepository;
-        this.modelMapper = modelMapper;
+        this.userPairEntityMapper = userPairEntityMapper;
     }
 
     @Transactional
@@ -30,14 +31,14 @@ public class UserService {
         UserEntity host = userRepository.save(new UserEntity());
         UserEntity guest = userRepository.save(new UserEntity());
         UserPairEntity userPair = userPairRepository.save(new UserPairEntity(host, guest));
-        return modelMapper.map(userPair, UserPair.class);
+        return userPairEntityMapper.map(userPair);
     }
 
     @Transactional(readOnly = true)
     public Optional<UserPair> findUserPair(final UUID userId) {
         return userRepository.findById(userId)
                 .flatMap(userPairRepository::findUserPairEntityByUser)
-                .map(userPairEntity -> modelMapper.map(userPairEntity, UserPair.class));
+                .map(userPairEntityMapper::map);
     }
 
     @Transactional(readOnly = true)

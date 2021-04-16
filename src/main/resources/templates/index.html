@@ -27,5 +27,9 @@
     <p th:case="${T(net.droth.strinder.view.model.UserType).HOST}" th:text="'Share URL: http://localhost:8080/u/'+ ${userPair.getGuest().getId()}"/>
     <p th:case="${T(net.droth.strinder.view.model.UserType).GUEST}" th:text="'Share URL: http://localhost:8080/u/'+ ${userPair.getHost().getId()}"/>
 </div>
+<div th:switch="${userType}">
+    <a th:case="${T(net.droth.strinder.view.model.UserType).HOST}" th:href="'http://localhost:8080/u/'+ ${userPair.getHost().getId()} + '/matches'">Matches</a>
+    <a th:case="${T(net.droth.strinder.view.model.UserType).GUEST}" th:href="'http://localhost:8080/u/'+ ${userPair.getGuest().getId()} + '/matches'">Matches</a>
+</div>
 </body>
 </html>

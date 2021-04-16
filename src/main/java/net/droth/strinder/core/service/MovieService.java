@@ -1,8 +1,8 @@
 package net.droth.strinder.core.service;
 
-import net.droth.strinder.core.model.Configuration;
-import net.droth.strinder.core.model.Genres;
-import net.droth.strinder.core.model.Movies;
+import net.droth.strinder.core.model.json.Configuration;
+import net.droth.strinder.core.model.json.Genres;
+import net.droth.strinder.core.model.json.Movies;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
@@ -12,11 +12,11 @@ import java.util.Random;
 public final class MovieService {
 
     private final TheMovieDbApi theMovieDbApi;
+    private final Random random;
 
-    private static final Random random = new Random();
-
-    public MovieService(final TheMovieDbApi theMovieDbApi) {
+    public MovieService(final TheMovieDbApi theMovieDbApi, final Random random) {
         this.theMovieDbApi = theMovieDbApi;
+        this.random = random;
     }
 
     public Mono<Genres> getGenres() {

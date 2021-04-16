@@ -1,8 +1,8 @@
 package net.droth.strinder.core.service;
 
-import net.droth.strinder.core.model.Configuration;
-import net.droth.strinder.core.model.Genres;
-import net.droth.strinder.core.model.Movies;
+import net.droth.strinder.core.model.json.Configuration;
+import net.droth.strinder.core.model.json.Genres;
+import net.droth.strinder.core.model.json.Movies;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;

@@ -1,4 +1,4 @@
-package net.droth.strinder.core.model;
+package net.droth.strinder.core.model.json;
 
 import lombok.Data;
 

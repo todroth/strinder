@@ -2,10 +2,7 @@ package net.droth.strinder.core.entity;
 
 import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.OneToOne;
+import javax.persistence.*;
 
 @Data
 @Entity(name = "Swipe")
@@ -29,6 +26,7 @@ public final class SwipeEntity {
 
     private int movieId;
 
+    @Enumerated(EnumType.STRING)
     private SwipeType swipeType;
 
     public enum SwipeType {
